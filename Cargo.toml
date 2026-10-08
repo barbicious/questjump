@@ -1,0 +1,12 @@
+[package]
+name = "cobblejump"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glfw = "0.63.0"
+anyhow = "1.0.104"
+glow = "0.18.0"
+bytemuck = "1.25.2"
+image = { version = "0.25.10", features = ["png"] }
+nalgebra-glm = "0.21.0"
