@@ -7,6 +7,7 @@ use crate::renderer::buffer::index_buffer::IndexBuffer;
 use crate::renderer::raw_texture::image_texture::ImageTexture;
 use crate::renderer::raw_texture::render_texture::RenderTexture;
 use crate::renderer::shader::ShaderProps;
+use crate::renderer::spritebatch::Spritebatch;
 use crate::renderer::vertex_array::VertexArray;
 use crate::window::Window;
 
@@ -55,36 +56,26 @@ fn main() -> anyhow::Result<()> {
 
     let image_texture = ImageTexture::new(renderer.gl(), "res/textures/player.png")?;
 
-    let vao = VertexArray::new(renderer.gl())?;
+    let mut spritebatch = Spritebatch::new(&renderer)?;
 
-    let vertices = [
-        0.0, 0.0, 0.0, 1.0,
-        128.0, 0.0, 1.0, 1.0,
-        128.0, 32.0, 1.0, 0.0,
-        0.0, 32.0, 0.0, 0.0
-    ];
-
-    let vbo = vbo!(renderer.gl(), &vao, glow::STATIC_DRAW, &vertices, 2, 2)?;
-
-    let ibo = IndexBuffer::new(renderer.gl(), glow::STATIC_DRAW, &indices)?;
+    spritebatch.blit(0.0, 0.0, 128.0, 32.0);
+    spritebatch.blit(0.0, 32.0, 128.0, 32.0);
 
     let projection_matrix = nalgebra_glm::ortho(0.0, 256.0, 0.0, 180.0, 0.01, 1.0);
+
     shader.set_mat4("u_proj", &projection_matrix);
 
     let render_texture = RenderTexture::new(renderer.gl(), 256, 180)?;
 
     while !window.should_close() {
         renderer.viewport(0, 0, 256, 180);
-
         render_texture.framebuffer().bind();
         renderer.clear();
         shader.bind();
-        vao.bind();
         image_texture.bind();
-        renderer.draw_triangle(6);
+        spritebatch.display(&renderer)?;
 
-        renderer.viewport(0, 0, 1280, 720);
-
+        renderer.viewport(0, 0, window.width(), window.height());
         render_texture.framebuffer().unbind();
         renderer.clear();
         quad_shader.bind();

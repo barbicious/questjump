@@ -9,8 +9,14 @@ pub struct VertexArray {
 
 impl VertexArray {
     pub fn new(gl: Rc<glow::Context>) -> anyhow::Result<Self> {
+        let id = unsafe { gl.create_vertex_array().map_err(anyhow::Error::msg)? };
+
+        unsafe {
+            gl.bind_vertex_array(Some(id));
+        }
+
         Ok(Self {
-            id: unsafe { gl.create_vertex_array().map_err(anyhow::Error::msg)? },
+            id,
             gl,
         })
     }

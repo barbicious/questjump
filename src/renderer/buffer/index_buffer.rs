@@ -7,7 +7,7 @@ pub struct IndexBuffer {
 }
 
 impl IndexBuffer {
-    pub fn new(gl: Rc<glow::Context>, usage: u32, data: &[i32]) -> anyhow::Result<Self> {
+    pub fn new(gl: Rc<glow::Context>, usage: u32, data: &[u32]) -> anyhow::Result<Self> {
         let buffer = Buffer::new(gl, glow::ELEMENT_ARRAY_BUFFER, usage, data)?;
         
         Ok(Self { buffer })

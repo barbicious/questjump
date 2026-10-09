@@ -37,7 +37,7 @@ impl Buffer {
     {
         unsafe {
             self.gl
-                .buffer_sub_data_u8_slice(self.target, offset, bytemuck::cast_slice(data));
+                .buffer_sub_data_u8_slice(self.target, offset * size_of::<T>() as i32, bytemuck::cast_slice(data));
         }
 
         Ok(())
