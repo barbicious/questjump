@@ -6,6 +6,7 @@ use crate::renderer::bindable::Bindable;
 use crate::renderer::buffer::index_buffer::IndexBuffer;
 use crate::renderer::raw_texture::image_texture::ImageTexture;
 use crate::renderer::raw_texture::render_texture::RenderTexture;
+use crate::renderer::rect::Rect;
 use crate::renderer::shader::ShaderProps;
 use crate::renderer::spritebatch::Spritebatch;
 use crate::renderer::vertex_array::VertexArray;
@@ -36,7 +37,7 @@ fn main() -> anyhow::Result<()> {
     let quad_vao = VertexArray::new(renderer.gl())?;
 
     let indices = [0, 1, 2, 0, 2, 3];
-
+ 
     let quad_vbo = vbo!(renderer.gl(), &quad_vao, glow::STATIC_DRAW, &quad_vertices, 2)?;
 
     let quad_ibo = IndexBuffer::new(renderer.gl(), glow::STATIC_DRAW, &indices)?;
@@ -58,8 +59,8 @@ fn main() -> anyhow::Result<()> {
 
     let mut spritebatch = Spritebatch::new(&renderer)?;
 
-    spritebatch.blit(0.0, 0.0, 128.0, 32.0);
-    spritebatch.blit(0.0, 32.0, 128.0, 32.0);
+    spritebatch.blit(Rect::new(100.0, 80.0, 32.0, 32.0), Rect::new(0.0, 0.0, 32.0, 32.0), 21.0);
+    spritebatch.blit(Rect::new(30.0, 120.0, 64.0, 32.0), Rect::new(32.0, 0.0, 64.0, 32.0), 4.0);
 
     let projection_matrix = nalgebra_glm::ortho(0.0, 256.0, 0.0, 180.0, 0.01, 1.0);
 

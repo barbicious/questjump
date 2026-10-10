@@ -1,6 +1,7 @@
 use crate::renderer::bindable::Bindable;
 use crate::renderer::buffer::index_buffer::IndexBuffer;
 use crate::renderer::buffer::vertex_buffer::VertexBuffer;
+use crate::renderer::rect::Rect;
 use crate::renderer::Renderer;
 use crate::renderer::vertex_array::VertexArray;
 use crate::vbo;
@@ -37,15 +38,35 @@ impl Spritebatch {
 
     }
 
-    pub fn blit(&mut self, x: f32, y: f32, width: f32, height: f32) {
+    pub fn blit(&mut self, dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
+        let origin = nalgebra_glm::vec2(dst.x, dst.y);
+
+        let cos_rotation = rotation.to_radians().cos();
+        let sin_rotation = rotation.to_radians().sin();
+
+        let rotation_matrix = nalgebra_glm::Mat2::new(cos_rotation, sin_rotation, -sin_rotation, cos_rotation);
+
+        let mut positions = [
+            nalgebra_glm::vec2(dst.x, dst.y),
+            nalgebra_glm::vec2(dst.x + dst.w, dst.y),
+            nalgebra_glm::vec2(dst.x + dst.w, dst.y + dst.h),
+            nalgebra_glm::vec2(dst.x, dst.y + dst.h),
+        ];
+
+        for pos in &mut positions {
+            let relative = *pos - origin;
+            *pos =  origin + (rotation_matrix * relative);
+        }
+
         let indices = [0 + self.blits * 4, 1 + self.blits * 4, 2 + self.blits * 4, 0 + self.blits * 4, 2 + self.blits * 4, 3 + self.blits * 4];
 
         let vertices = [
-            x, y, 0.0, 1.0,
-            x + width, y, 1.0, 1.0,
-            x + width, y + height, 1.0, 0.0,
-            x, y + height, 0.0, 0.0
+            positions[0].x, positions[0].y, src.x / 128.0, src.y / 32.0 + src.h / 32.0,
+            positions[1].x, positions[1].y, src.x / 128.0 + src.w / 128.0, src.y / 32.0 + src.h / 32.0,
+            positions[2].x, positions[2].y, src.x / 128.0 + src.w / 128.0, src.y / 32.0,
+            positions[3].x, positions[3].y, src.x / 128.0, src.y / 32.0
         ];
+
 
         self.indices[(self.blits as usize * 6)..(self.blits as usize * 6 + 6)].copy_from_slice(indices.as_slice());
         self.vertices[(self.blits as usize * 16)..(self.blits as usize * 16 + 16)].copy_from_slice(vertices.as_slice());

@@ -4,6 +4,7 @@ pub mod shader;
 pub mod vertex_array;
 pub mod raw_texture;
 pub mod spritebatch;
+pub mod rect;
 
 use glow::HasContext;
 use std::rc::Rc;
