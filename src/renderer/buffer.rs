@@ -22,13 +22,12 @@ impl Buffer {
         T: bytemuck::Pod + bytemuck::Zeroable,
     {
         let id = unsafe { gl.create_buffer().map_err(anyhow::Error::msg)? };
-
-        unsafe {
+         unsafe {
             gl.bind_buffer(target, Some(id));
             gl.buffer_data_u8_slice(target, bytemuck::cast_slice(data), usage);
         }
 
-        Ok(Buffer { gl, id, target })
+        Ok(Self { gl, id, target })
     }
 
     pub fn upload_data<T>(&self, offset: i32, data: &[T]) -> anyhow::Result<()>

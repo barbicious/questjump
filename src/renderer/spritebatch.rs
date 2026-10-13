@@ -1,4 +1,5 @@
 use crate::renderer::bindable::Bindable;
+use crate::renderer::blittable::Blittable;
 use crate::renderer::buffer::index_buffer::IndexBuffer;
 use crate::renderer::buffer::vertex_buffer::VertexBuffer;
 use crate::renderer::rect::Rect;
@@ -38,7 +39,29 @@ impl Spritebatch {
 
     }
 
-    pub fn blit(&mut self, dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
+    pub fn display(&mut self) -> anyhow::Result<()> {
+        self.vertex_array.bind();
+
+        self.vertex_buffer.upload_data(0, self.vertices.as_slice())?;
+        self.index_buffer.upload_data(0, self.indices.as_slice())?;
+
+        self.vertices.fill(0.0);
+        self.indices.fill(0);
+        
+        Ok(())
+    }
+
+    pub fn indices(&self) -> u32 {
+        self.blits * 6
+    }
+    
+    pub fn reset_blits(&mut self) {
+        self.blits = 0;
+    }
+}
+
+impl Blittable for Spritebatch {
+    fn blit(&mut self, dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
         let origin = nalgebra_glm::vec2(dst.x, dst.y);
 
         let cos_rotation = rotation.to_radians().cos();
@@ -72,16 +95,5 @@ impl Spritebatch {
         self.vertices[(self.blits as usize * 16)..(self.blits as usize * 16 + 16)].copy_from_slice(vertices.as_slice());
 
         self.blits += 1;
-    }
-
-    pub fn display(&mut self, renderer: &Renderer) -> anyhow::Result<()> {
-        self.vertex_array.bind();
-
-        self.vertex_buffer.upload_data(0, self.vertices.as_slice())?;
-        self.index_buffer.upload_data(0, self.indices.as_slice())?;
-
-        renderer.draw_triangle(12);
-
-        Ok(())
     }
 }

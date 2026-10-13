@@ -45,7 +45,7 @@ impl Window {
                     std::ptr::null()
                 }
             })
-        }));
+        }))?;
         
         let width = Rc::new(Cell::new(width));
         let height = Rc::new(Cell::new(height));
