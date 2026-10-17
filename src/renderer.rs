@@ -7,6 +7,7 @@ pub mod spritebatch;
 pub mod rect;
 pub mod blittable;
 pub mod window;
+mod texture_atlas;
 
 use crate::renderer::bindable::Bindable;
 use crate::renderer::blittable::Blittable;
@@ -22,6 +23,7 @@ use crate::{shader, vbo};
 use glow::HasContext;
 use std::rc::Rc;
 use window::Window;
+use crate::renderer::texture_atlas::TextureAtlas;
 
 pub type Texture2D = Rect<i32>;
 
@@ -33,7 +35,7 @@ pub struct Renderer {
     quad_shader: Shader,
     sprite_shader: Shader,
     render_texture: RenderTexture,
-    image_texture: ImageTexture,
+    texture_atlas: TextureAtlas,
     spritebatches: Vec<Spritebatch>,
 }
 
@@ -79,7 +81,7 @@ impl Renderer {
     );
         sprite_shader.bind();
 
-        let image_texture = ImageTexture::new(gl.clone(), "res/textures/player.png")?;
+        let texture_atlas = TextureAtlas::new(gl.clone())?;
 
         let projection_matrix = nalgebra_glm::ortho(0.0, 256.0, 0.0, 180.0, 0.01, 1.0);
 
@@ -94,7 +96,7 @@ impl Renderer {
             gl.clear_color(0.45, 0.55, 0.7, 1.0);
         }
 
-        Ok(Self { gl, quad_vao, quad_vbo, quad_ibo, quad_shader, sprite_shader, render_texture, image_texture, spritebatches: Vec::new() })
+        Ok(Self { gl, quad_vao, quad_vbo, quad_ibo, quad_shader, sprite_shader, render_texture, texture_atlas, spritebatches: Vec::new() })
     }
 
     pub fn clear(&self) {
@@ -124,7 +126,7 @@ impl Renderer {
         self.render_texture.framebuffer().bind();
         self.clear();
         self.sprite_shader.bind();
-        self.image_texture.bind();
+        self.texture_atlas.bind();
     }
 
     pub fn display(&mut self, window: &Window) {
@@ -142,14 +144,18 @@ impl Renderer {
         self.render_texture.bind();
         self.draw_triangle(6);
     }
-}
 
-impl Blittable for Renderer {
-    fn blit(&mut self, dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
+    pub fn blit(&mut self, texture2d: &Texture2D, dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
         if self.spritebatches.is_empty() {
             self.spritebatches.push(Spritebatch::new(self).unwrap());
         }
 
-        self.spritebatches.last_mut().unwrap().blit(dst, src, rotation);
+        self.spritebatches.last_mut().unwrap().blit((self.texture_atlas.width() as f32, self.texture_atlas.height() as f32), dst, Rect {
+            x: src.x + texture2d.x as f32,
+            y: src.y + texture2d.y as f32,
+            w: src.w,
+            h: src.h,
+        }, rotation);
     }
+
 }

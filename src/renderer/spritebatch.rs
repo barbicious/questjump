@@ -17,10 +17,12 @@ pub struct Spritebatch {
 }
 
 impl Spritebatch {
-    pub fn new(renderer: &Renderer) -> anyhow::Result<Self> {
-        let indices = vec![0; 1024 * 6];
+    const MAX_BLITS: usize = 1024;
 
-        let vertices = vec![0.0; 1024 * 16];
+    pub fn new(renderer: &Renderer) -> anyhow::Result<Self> {
+        let indices = vec![0; Self::MAX_BLITS * 6];
+
+        let vertices = vec![0.0; Self::MAX_BLITS * 16];
 
         let vertex_array = VertexArray::new(renderer.gl())?;
 
@@ -58,10 +60,8 @@ impl Spritebatch {
     pub fn reset_blits(&mut self) {
         self.blits = 0;
     }
-}
 
-impl Blittable for Spritebatch {
-    fn blit(&mut self, dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
+    pub fn blit(&mut self, texture_size: (f32, f32), dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
         let origin = nalgebra_glm::vec2(dst.x, dst.y);
 
         let cos_rotation = rotation.to_radians().cos();
@@ -84,10 +84,10 @@ impl Blittable for Spritebatch {
         let indices = [0 + self.blits * 4, 1 + self.blits * 4, 2 + self.blits * 4, 0 + self.blits * 4, 2 + self.blits * 4, 3 + self.blits * 4];
 
         let vertices = [
-            positions[0].x, positions[0].y, src.x / 128.0, src.y / 32.0 + src.h / 32.0,
-            positions[1].x, positions[1].y, src.x / 128.0 + src.w / 128.0, src.y / 32.0 + src.h / 32.0,
-            positions[2].x, positions[2].y, src.x / 128.0 + src.w / 128.0, src.y / 32.0,
-            positions[3].x, positions[3].y, src.x / 128.0, src.y / 32.0
+            positions[0].x, positions[0].y, src.x / texture_size.0, src.y / texture_size.1 + src.h / texture_size.1,
+            positions[1].x, positions[1].y, src.x / texture_size.0 + src.w / texture_size.0, src.y / texture_size.1 + src.h / texture_size.1,
+            positions[2].x, positions[2].y, src.x / texture_size.0 + src.w / texture_size.0, src.y / texture_size.1,
+            positions[3].x, positions[3].y, src.x / texture_size.0, src.y / texture_size.1
         ];
 
 

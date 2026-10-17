@@ -28,8 +28,15 @@ impl ImageTexture {
 
         Ok(Self { raw_texture, width, height })
     }
+    
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+    
+    pub fn height(&self) -> u32 {
+        self.height
+    }
 }
-
 
 impl Deref for ImageTexture {
     type Target = RawTexture;
