@@ -53,7 +53,7 @@ impl Window {
         let callback_width = width.clone();
         let callback_height = height.clone();
         
-        window.set_framebuffer_size_callback(move |window, width, height| unsafe {
+        window.set_framebuffer_size_callback(move |_window, width, height| {
             callback_width.set(width);
             callback_height.set(height);
         });

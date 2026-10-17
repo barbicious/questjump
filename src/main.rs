@@ -1,20 +1,17 @@
 mod renderer;
-mod window;
+pub mod registry;
 
-use glow::HasContext;
 use crate::renderer::bindable::Bindable;
 use crate::renderer::blittable::Blittable;
-use crate::renderer::buffer::index_buffer::IndexBuffer;
-use crate::renderer::raw_texture::image_texture::ImageTexture;
-use crate::renderer::raw_texture::render_texture::RenderTexture;
 use crate::renderer::rect::Rect;
-use crate::renderer::shader::ShaderProps;
-use crate::renderer::spritebatch::Spritebatch;
-use crate::renderer::vertex_array::VertexArray;
-use crate::window::Window;
+use glow::HasContext;
+use renderer::window::Window;
+use crate::registry::texture_registry::TextureRegistry;
 
 fn main() -> anyhow::Result<()> {
     let (mut window, mut renderer) = Window::new("cobblejump", 1280, 720)?;
+
+    let texture_registry = TextureRegistry::new("res/textures/")?;
 
     while !window.should_close() {
         renderer.flush();

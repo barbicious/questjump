@@ -6,11 +6,8 @@ pub mod raw_texture;
 pub mod spritebatch;
 pub mod rect;
 pub mod blittable;
+pub mod window;
 
-use glow::HasContext;
-use std::rc::Rc;
-use crate::renderer::vertex_array::VertexArray;
-use crate::{shader, vbo};
 use crate::renderer::bindable::Bindable;
 use crate::renderer::blittable::Blittable;
 use crate::renderer::buffer::index_buffer::IndexBuffer;
@@ -20,7 +17,13 @@ use crate::renderer::raw_texture::render_texture::RenderTexture;
 use crate::renderer::rect::Rect;
 use crate::renderer::shader::{Shader, ShaderProps};
 use crate::renderer::spritebatch::Spritebatch;
-use crate::window::Window;
+use crate::renderer::vertex_array::VertexArray;
+use crate::{shader, vbo};
+use glow::HasContext;
+use std::rc::Rc;
+use window::Window;
+
+pub type Texture2D = Rect<i32>;
 
 pub struct Renderer {
     gl: Rc<glow::Context>,
@@ -88,7 +91,7 @@ impl Renderer {
             gl.blend_func(glow::SRC_ALPHA, glow::ONE_MINUS_SRC_ALPHA);
             gl.enable(glow::BLEND);
 
-            gl.clear_color(0.7, 0.6, 0.2, 1.0);
+            gl.clear_color(0.45, 0.55, 0.7, 1.0);
         }
 
         Ok(Self { gl, quad_vao, quad_vbo, quad_ibo, quad_shader, sprite_shader, render_texture, image_texture, spritebatches: Vec::new() })
