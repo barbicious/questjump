@@ -7,7 +7,7 @@ pub mod spritebatch;
 pub mod rect;
 pub mod blittable;
 pub mod window;
-mod texture_atlas;
+pub mod texture_atlas;
 
 use crate::renderer::bindable::Bindable;
 use crate::renderer::blittable::Blittable;
@@ -23,6 +23,7 @@ use crate::{shader, vbo};
 use glow::HasContext;
 use std::rc::Rc;
 use window::Window;
+use crate::registry::texture_registry::TextureRegistry;
 use crate::renderer::texture_atlas::TextureAtlas;
 
 pub type Texture2D = Rect<i32>;
@@ -97,6 +98,10 @@ impl Renderer {
         }
 
         Ok(Self { gl, quad_vao, quad_vbo, quad_ibo, quad_shader, sprite_shader, render_texture, texture_atlas, spritebatches: Vec::new() })
+    }
+    
+    pub fn texture_atlas(&self) -> &TextureAtlas {
+        &self.texture_atlas
     }
 
     pub fn clear(&self) {
