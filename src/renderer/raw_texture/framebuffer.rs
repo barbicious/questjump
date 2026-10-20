@@ -1,6 +1,6 @@
-use std::rc::Rc;
-use glow::HasContext;
 use crate::renderer::bindable::Bindable;
+use glow::HasContext;
+use std::rc::Rc;
 
 pub struct Framebuffer {
     gl: Rc<glow::Context>,
@@ -9,17 +9,15 @@ pub struct Framebuffer {
 
 impl Framebuffer {
     pub fn new(gl: Rc<glow::Context>) -> anyhow::Result<Self> {
-        let id = unsafe {
-            gl.create_framebuffer().map_err(anyhow::Error::msg)?
-        };
-        
+        let id = unsafe { gl.create_framebuffer().map_err(anyhow::Error::msg)? };
+
         unsafe {
             gl.bind_framebuffer(glow::FRAMEBUFFER, Some(id));
         }
 
         Ok(Self { gl, id })
     }
-    
+
     pub fn complete(&self) -> anyhow::Result<()> {
         unsafe {
             if self.gl.check_framebuffer_status(glow::FRAMEBUFFER) != glow::FRAMEBUFFER_COMPLETE {
@@ -27,7 +25,7 @@ impl Framebuffer {
 
                 anyhow::bail!("Failed to create framebuffer")
             }
-            
+
             Ok(())
         }
     }
@@ -47,7 +45,7 @@ impl Bindable for Framebuffer {
             self.gl.bind_framebuffer(glow::FRAMEBUFFER, Some(self.id));
         }
     }
-    
+
     fn unbind(&self) {
         unsafe {
             self.gl.bind_framebuffer(glow::FRAMEBUFFER, None);

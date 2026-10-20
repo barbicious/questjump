@@ -1,8 +1,8 @@
 use crate::renderer::bindable::Bindable;
 use glow::{HasContext, NativeProgram};
+use nalgebra_glm::Mat4;
 use std::path::Path;
 use std::rc::Rc;
-use nalgebra_glm::Mat4;
 
 pub struct Shader {
     id: NativeProgram,
@@ -55,7 +55,11 @@ impl Shader {
 
     pub fn set_mat4(&self, name: &str, mat4: &Mat4) {
         unsafe {
-            self.gl.uniform_matrix_4_f32_slice(self.gl.get_uniform_location(self.id, name).as_ref(), false, mat4.data.as_slice());
+            self.gl.uniform_matrix_4_f32_slice(
+                self.gl.get_uniform_location(self.id, name).as_ref(),
+                false,
+                mat4.data.as_slice(),
+            );
         }
     }
 }

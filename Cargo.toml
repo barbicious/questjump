@@ -11,3 +11,5 @@ bytemuck = "1.25.2"
 image = { version = "0.25.10", features = ["png"] }
 nalgebra-glm = "0.21.0"
 rect_packer = "0.2.1"
+serde = { version = "1.0.229", features = ["serde_derive"] }
+ron = "0.12.2"

@@ -1,5 +1,5 @@
-pub mod vertex_buffer;
 pub mod index_buffer;
+pub mod vertex_buffer;
 
 use crate::renderer::bindable::Bindable;
 use glow::HasContext;
@@ -22,7 +22,7 @@ impl Buffer {
         T: bytemuck::Pod + bytemuck::Zeroable,
     {
         let id = unsafe { gl.create_buffer().map_err(anyhow::Error::msg)? };
-         unsafe {
+        unsafe {
             gl.bind_buffer(target, Some(id));
             gl.buffer_data_u8_slice(target, bytemuck::cast_slice(data), usage);
         }
@@ -35,8 +35,11 @@ impl Buffer {
         T: bytemuck::Pod + bytemuck::Zeroable,
     {
         unsafe {
-            self.gl
-                .buffer_sub_data_u8_slice(self.target, offset * size_of::<T>() as i32, bytemuck::cast_slice(data));
+            self.gl.buffer_sub_data_u8_slice(
+                self.target,
+                offset * size_of::<T>() as i32,
+                bytemuck::cast_slice(data),
+            );
         }
 
         Ok(())

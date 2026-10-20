@@ -1,14 +1,15 @@
 pub mod bindable;
-pub mod buffer;
-pub mod shader;
-pub mod vertex_array;
-pub mod raw_texture;
-pub mod spritebatch;
-pub mod rect;
 pub mod blittable;
-pub mod window;
+pub mod buffer;
+pub mod raw_texture;
+pub mod rect;
+pub mod shader;
+pub mod spritebatch;
 pub mod texture_atlas;
+pub mod vertex_array;
+pub mod window;
 
+use crate::registry::texture_registry::TextureRegistry;
 use crate::renderer::bindable::Bindable;
 use crate::renderer::blittable::Blittable;
 use crate::renderer::buffer::index_buffer::IndexBuffer;
@@ -18,13 +19,12 @@ use crate::renderer::raw_texture::render_texture::RenderTexture;
 use crate::renderer::rect::Rect;
 use crate::renderer::shader::{Shader, ShaderProps};
 use crate::renderer::spritebatch::Spritebatch;
+use crate::renderer::texture_atlas::TextureAtlas;
 use crate::renderer::vertex_array::VertexArray;
 use crate::{shader, vbo};
 use glow::HasContext;
 use std::rc::Rc;
 use window::Window;
-use crate::registry::texture_registry::TextureRegistry;
-use crate::renderer::texture_atlas::TextureAtlas;
 
 pub type Texture2D = Rect<i32>;
 
@@ -54,12 +54,7 @@ impl Renderer {
             }
         );
 
-        let quad_vertices = [
-            -1.0, -1.0,
-            1.0, -1.0,
-            1.0, 1.0,
-            -1.0, 1.0,
-        ];
+        let quad_vertices = [-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0];
 
         let quad_vao = VertexArray::new(gl.clone())?;
 
@@ -70,16 +65,16 @@ impl Renderer {
         let quad_ibo = IndexBuffer::new(gl.clone(), glow::STATIC_DRAW, &indices)?;
 
         let sprite_shader = shader!(
-        gl.clone(),
-        ShaderProps {
-            src: include_str!("renderer/sprite.vert"),
-            r#type: glow::VERTEX_SHADER
-        },
-        ShaderProps {
-            src: include_str!("renderer/sprite.frag"),
-            r#type: glow::FRAGMENT_SHADER
-        }
-    );
+            gl.clone(),
+            ShaderProps {
+                src: include_str!("renderer/sprite.vert"),
+                r#type: glow::VERTEX_SHADER
+            },
+            ShaderProps {
+                src: include_str!("renderer/sprite.frag"),
+                r#type: glow::FRAGMENT_SHADER
+            }
+        );
         sprite_shader.bind();
 
         let texture_atlas = TextureAtlas::new(gl.clone())?;
@@ -97,9 +92,19 @@ impl Renderer {
             gl.clear_color(0.45, 0.55, 0.7, 1.0);
         }
 
-        Ok(Self { gl, quad_vao, quad_vbo, quad_ibo, quad_shader, sprite_shader, render_texture, texture_atlas, spritebatches: Vec::new() })
+        Ok(Self {
+            gl,
+            quad_vao,
+            quad_vbo,
+            quad_ibo,
+            quad_shader,
+            sprite_shader,
+            render_texture,
+            texture_atlas,
+            spritebatches: Vec::new(),
+        })
     }
-    
+
     pub fn texture_atlas(&self) -> &TextureAtlas {
         &self.texture_atlas
     }
@@ -122,7 +127,8 @@ impl Renderer {
 
     pub fn draw_triangle(&self, count: i32) {
         unsafe {
-            self.gl.draw_elements(glow::TRIANGLES, count, glow::UNSIGNED_INT, 0);
+            self.gl
+                .draw_elements(glow::TRIANGLES, count, glow::UNSIGNED_INT, 0);
         }
     }
 
@@ -155,12 +161,19 @@ impl Renderer {
             self.spritebatches.push(Spritebatch::new(self).unwrap());
         }
 
-        self.spritebatches.last_mut().unwrap().blit((self.texture_atlas.width() as f32, self.texture_atlas.height() as f32), dst, Rect {
-            x: src.x + texture2d.x as f32,
-            y: src.y + texture2d.y as f32,
-            w: src.w,
-            h: src.h,
-        }, rotation);
+        self.spritebatches.last_mut().unwrap().blit(
+            (
+                self.texture_atlas.width() as f32,
+                self.texture_atlas.height() as f32,
+            ),
+            dst,
+            Rect {
+                x: src.x + texture2d.x as f32,
+                y: src.y + texture2d.y as f32,
+                w: src.w,
+                h: src.h,
+            },
+            rotation,
+        );
     }
-
 }

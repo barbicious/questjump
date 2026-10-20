@@ -15,10 +15,7 @@ impl VertexArray {
             gl.bind_vertex_array(Some(id));
         }
 
-        Ok(Self {
-            id,
-            gl,
-        })
+        Ok(Self { id, gl })
     }
 }
 

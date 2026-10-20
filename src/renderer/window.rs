@@ -1,8 +1,8 @@
-use std::cell::Cell;
 use crate::renderer::Renderer;
 use glfw::{Context, log_errors};
-use std::rc::Rc;
 use glow::HasContext;
+use std::cell::Cell;
+use std::rc::Rc;
 
 pub struct Window {
     glfw: glfw::Glfw,
@@ -46,13 +46,13 @@ impl Window {
                 }
             })
         }))?;
-        
+
         let width = Rc::new(Cell::new(width));
         let height = Rc::new(Cell::new(height));
-        
+
         let callback_width = width.clone();
         let callback_height = height.clone();
-        
+
         window.set_framebuffer_size_callback(move |_window, width, height| {
             callback_width.set(width);
             callback_height.set(height);
@@ -73,11 +73,11 @@ impl Window {
     pub fn width(&self) -> i32 {
         self.width.get()
     }
-    
+
     pub fn height(&self) -> i32 {
         self.height.get()
     }
-    
+
     pub fn should_close(&mut self) -> bool {
         self.glfw.poll_events();
         self.window.should_close()

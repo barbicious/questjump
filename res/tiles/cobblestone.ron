@@ -1,0 +1,4 @@
+TilePayload(
+    name: "cobblestone",
+    texture_name: "cobblestone"
+)

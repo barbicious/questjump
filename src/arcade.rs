@@ -1,3 +1,3 @@
-pub struct Arcade {
-    
-}
+pub mod tile;
+
+pub struct Arcade {}

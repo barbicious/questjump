@@ -55,20 +55,20 @@ macro_rules! vbo {
 
             VertexBuffer::new($gl, $usage, $data).map(|vbo| {
                 let stride = 0 $( + $size)+;
-    
+
                 #[allow(unused_assignments)]
                 {
                     let mut index = 0;
                     let mut offset = 0;
-    
+
                     $(
                         vbo.attrib($vao, index, $size, stride, offset);
-    
+
                         offset += $size;
                         index += 1;
                     )+
                 }
-    
+
                 vbo
             })
     }};

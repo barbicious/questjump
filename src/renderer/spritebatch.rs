@@ -1,9 +1,9 @@
+use crate::renderer::Renderer;
 use crate::renderer::bindable::Bindable;
 use crate::renderer::blittable::Blittable;
 use crate::renderer::buffer::index_buffer::IndexBuffer;
 use crate::renderer::buffer::vertex_buffer::VertexBuffer;
 use crate::renderer::rect::Rect;
-use crate::renderer::Renderer;
 use crate::renderer::vertex_array::VertexArray;
 use crate::vbo;
 
@@ -26,7 +26,14 @@ impl Spritebatch {
 
         let vertex_array = VertexArray::new(renderer.gl())?;
 
-        let vertex_buffer = vbo!(renderer.gl(), &vertex_array, glow::DYNAMIC_DRAW, vertices.as_slice(), 2, 2)?;
+        let vertex_buffer = vbo!(
+            renderer.gl(),
+            &vertex_array,
+            glow::DYNAMIC_DRAW,
+            vertices.as_slice(),
+            2,
+            2
+        )?;
 
         let index_buffer = IndexBuffer::new(renderer.gl(), glow::DYNAMIC_DRAW, indices.as_slice())?;
 
@@ -38,36 +45,43 @@ impl Spritebatch {
             vertex_buffer,
             index_buffer,
         })
-
     }
 
     pub fn display(&mut self) -> anyhow::Result<()> {
         self.vertex_array.bind();
 
-        self.vertex_buffer.upload_data(0, self.vertices.as_slice())?;
+        self.vertex_buffer
+            .upload_data(0, self.vertices.as_slice())?;
         self.index_buffer.upload_data(0, self.indices.as_slice())?;
 
         self.vertices.fill(0.0);
         self.indices.fill(0);
-        
+
         Ok(())
     }
 
     pub fn indices(&self) -> u32 {
         self.blits * 6
     }
-    
+
     pub fn reset_blits(&mut self) {
         self.blits = 0;
     }
 
-    pub fn blit(&mut self, texture_size: (f32, f32), dst: Rect<f32>, src: Rect<f32>, rotation: f32) {
+    pub fn blit(
+        &mut self,
+        texture_size: (f32, f32),
+        dst: Rect<f32>,
+        src: Rect<f32>,
+        rotation: f32,
+    ) {
         let origin = nalgebra_glm::vec2(dst.x, dst.y);
 
         let cos_rotation = rotation.to_radians().cos();
         let sin_rotation = rotation.to_radians().sin();
 
-        let rotation_matrix = nalgebra_glm::Mat2::new(cos_rotation, sin_rotation, -sin_rotation, cos_rotation);
+        let rotation_matrix =
+            nalgebra_glm::Mat2::new(cos_rotation, sin_rotation, -sin_rotation, cos_rotation);
 
         let mut positions = [
             nalgebra_glm::vec2(dst.x, dst.y),
@@ -78,21 +92,41 @@ impl Spritebatch {
 
         for pos in &mut positions {
             let relative = *pos - origin;
-            *pos =  origin + (rotation_matrix * relative);
+            *pos = origin + (rotation_matrix * relative);
         }
 
-        let indices = [0 + self.blits * 4, 1 + self.blits * 4, 2 + self.blits * 4, 0 + self.blits * 4, 2 + self.blits * 4, 3 + self.blits * 4];
-
-        let vertices = [
-            positions[0].x, positions[0].y, src.x / texture_size.0, src.y / texture_size.1 + src.h / texture_size.1,
-            positions[1].x, positions[1].y, src.x / texture_size.0 + src.w / texture_size.0, src.y / texture_size.1 + src.h / texture_size.1,
-            positions[2].x, positions[2].y, src.x / texture_size.0 + src.w / texture_size.0, src.y / texture_size.1,
-            positions[3].x, positions[3].y, src.x / texture_size.0, src.y / texture_size.1
+        let indices = [
+            0 + self.blits * 4,
+            1 + self.blits * 4,
+            2 + self.blits * 4,
+            0 + self.blits * 4,
+            2 + self.blits * 4,
+            3 + self.blits * 4,
         ];
 
+        let vertices = [
+            positions[0].x,
+            positions[0].y,
+            src.x / texture_size.0,
+            src.y / texture_size.1 + src.h / texture_size.1,
+            positions[1].x,
+            positions[1].y,
+            src.x / texture_size.0 + src.w / texture_size.0,
+            src.y / texture_size.1 + src.h / texture_size.1,
+            positions[2].x,
+            positions[2].y,
+            src.x / texture_size.0 + src.w / texture_size.0,
+            src.y / texture_size.1,
+            positions[3].x,
+            positions[3].y,
+            src.x / texture_size.0,
+            src.y / texture_size.1,
+        ];
 
-        self.indices[(self.blits as usize * 6)..(self.blits as usize * 6 + 6)].copy_from_slice(indices.as_slice());
-        self.vertices[(self.blits as usize * 16)..(self.blits as usize * 16 + 16)].copy_from_slice(vertices.as_slice());
+        self.indices[(self.blits as usize * 6)..(self.blits as usize * 6 + 6)]
+            .copy_from_slice(indices.as_slice());
+        self.vertices[(self.blits as usize * 16)..(self.blits as usize * 16 + 16)]
+            .copy_from_slice(vertices.as_slice());
 
         self.blits += 1;
     }
